@@ -14,6 +14,7 @@ public class BigSphereController : MonoBehaviour {
 	ArrayList visibleTargets;
 	Vector3 sphereForce;
 	Rigidbody rigidSphere;
+	bool targetStateChanged;
 
 	// Use this for initialization
 	void Start () {
@@ -24,6 +25,7 @@ public class BigSphereController : MonoBehaviour {
 		targets = GameObject.FindGameObjectsWithTag ("Target");
 		visibleTargets = new ArrayList ();
 		Debug.Log (targets.Length);
+		targetStateChanged = false;
 	}
 	
 	// Update is called once per frame
@@ -33,11 +35,13 @@ public class BigSphereController : MonoBehaviour {
 				if (!this.visibleTargets.Contains(uTarget)){
 					visibleTargets.Add(uTarget);
 					coverage.Add (uTarget, 0);
+					targetStateChanged = true;
 				}
 			}
 			else if (visibleTargets.Contains (uTarget)){
 				visibleTargets.Remove (uTarget);
 				coverage.Remove (uTarget);
+				targetStateChanged = true;
 			}
 		}
 	}
@@ -46,30 +50,40 @@ public class BigSphereController : MonoBehaviour {
 		float v = Input.GetAxis ("Vertical");
 		sphereForce.Set (h, 0f, v);
 		rigidSphere.AddForce (sphereForce * speed * Time.fixedDeltaTime);
-
-		foreach (GameObject medSphere in mediumSpheres) {
-			if (!targetInRange()){
-				medSphere.GetComponent<MediumSphereController>().setDestination(this.transform.position);
-				medSphere.GetComponent<MediumSphereController>().setIsEngaged (false);
-			}
-			else {
+		if (targetInRange()) {
+			if (targetStateChanged){
 				foreach (GameObject target in visibleTargets){
 					if (coverage[target] == 0){
-						if (!medSphere.GetComponent<MediumSphereController>().getIsEngaged()){ 
+						GameObject medSphere = getAvailableMedSphere();
+						if (medSphere != null){
 							medSphere.GetComponent<MediumSphereController>().setDestination(target.transform.position);
 							medSphere.GetComponent<MediumSphereController>().setIsEngaged (true);
 							coverage[target] += 1;
 						}
 					}
-					else if (!medSphere.GetComponent<MediumSphereController>().getIsEngaged()){
-						medSphere.GetComponent<MediumSphereController>().setDestination(this.transform.position);
-					}
+				}
+				targetStateChanged = false;
+			}
+			else foreach(GameObject medSphere in mediumSpheres) {
+				if(!medSphere.GetComponent<MediumSphereController>().getIsEngaged()){
+					medSphere.GetComponent<MediumSphereController>().setDestination(this.transform.position);
+					medSphere.GetComponent<MediumSphereController>().setIsEngaged (false);
 				}
 			}
+		}
+		else foreach(GameObject medSphere in mediumSpheres) {
+			medSphere.GetComponent<MediumSphereController>().setDestination(this.transform.position);
+			medSphere.GetComponent<MediumSphereController>().setIsEngaged (false);
 		}
 	}
 	public bool targetInRange(){
 		if (this.visibleTargets.Count == 0)	return false; 
 		else return true;
+	}
+	GameObject getAvailableMedSphere(){
+		foreach(GameObject medSphere in mediumSpheres){
+			if (medSphere.GetComponent<MediumSphereController>().getIsEngaged() == false) return medSphere;
+		}
+		return null;
 	}
 }

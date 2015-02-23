@@ -34,12 +34,12 @@ public class MediumSphereController : MonoBehaviour {
 	}
 
 	void FixedUpdate(){
-		foreach(GameObject sphere in otherMedSpheres){
-			distanceToMedSphere = sphere.transform.position - this.transform.position;
-			if (distanceToMedSphere.magnitude < this.minDistanceToOtherMedSpheres){
-				MSRigidBody.AddForce(-1f * distanceToMedSphere * speed * Time.fixedDeltaTime);
-			}
-		}
+		//foreach(GameObject sphere in otherMedSpheres){
+		//	distanceToMedSphere = sphere.transform.position - this.transform.position;
+		//	if (distanceToMedSphere.magnitude < this.minDistanceToOtherMedSpheres){
+		//		MSRigidBody.AddForce(-1f * distanceToMedSphere * speed * Time.fixedDeltaTime);
+		//	}
+		//}
 
 		pursueTarget();
 	
