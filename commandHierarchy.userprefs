@@ -1,0 +1,16 @@
+﻿<Properties>
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets\Scripts\TargetController.cs">
+    <Files>
+      <File FileName="Assets\Scripts\BigSphereController.cs" Line="20" Column="16" />
+      <File FileName="Assets\Scripts\MediumSphereController.cs" Line="1" Column="1" />
+      <File FileName="Assets\FixRotation.cs" Line="1" Column="1" />
+      <File FileName="Assets\GUIScript.cs" Line="1" Column="1" />
+      <File FileName="Assets\Scripts\TargetController.cs" Line="21" Column="82" />
+    </Files>
+  </MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore />
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+</Properties>
