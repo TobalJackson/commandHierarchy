@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 public class MediumSphereController : MonoBehaviour {
 	public int speed;
@@ -16,9 +17,11 @@ public class MediumSphereController : MonoBehaviour {
 	Vector3 targetLocation;
 	Vector3 distanceToTarget;
 
-	GameObject[] targets;
+	List<GameObject> targets;
 	ArrayList visibleTargets;
 
+	bool canAttack;
+	float lastAttack;
 	//ArrayList mySmallSpheres;
 	//public GameObject smallSphere1;
 	//GameObject[] smallSpheres;
@@ -27,6 +30,8 @@ public class MediumSphereController : MonoBehaviour {
 	bool isEngaged;
 
 	void Start () {
+		canAttack = true;
+		targets = new List<GameObject> ();
 		//mySmallSpheres = new ArrayList ();
 		otherMedSpheres = GameObject.FindGameObjectsWithTag ("MediumSphere");
 		MSRigidBody = GetComponent<Rigidbody> ();
@@ -34,8 +39,9 @@ public class MediumSphereController : MonoBehaviour {
 		distanceToPlayer = player.transform.position - this.transform.position;
 		maxDistance = player.GetComponent<BigSphereController>().followerMaxDistance;
 		minDistance = player.GetComponent<BigSphereController> ().followerMinDistance;
-		targets = GameObject.FindGameObjectsWithTag ("Target");
+		targets.AddRange(GameObject.FindGameObjectsWithTag ("Target"));
 		visibleTargets = new ArrayList ();
+		lastAttack = 0;
 		//maxFollowers = 1;
 		//smallSpheres = GameObject.FindGameObjectsWithTag ("SmallSphere");
 		//mySmallSpheres.Add (smallSphere1.gameObject);
@@ -59,18 +65,30 @@ public class MediumSphereController : MonoBehaviour {
 	}
 
 	void FixedUpdate(){
-		//foreach(GameObject sphere in otherMedSpheres){
-		//	distanceToMedSphere = sphere.transform.position - this.transform.position;
-		//	if (distanceToMedSphere.magnitude < this.minDistanceToOtherMedSpheres){
-		//		MSRigidBody.AddForce(-1f * distanceToMedSphere * speed * Time.fixedDeltaTime);
-		//	}
-		//}
+		foreach(GameObject sphere in otherMedSpheres){
+			distanceToMedSphere = sphere.transform.position - this.transform.position;
+			if (distanceToMedSphere.magnitude < this.minDistanceToOtherMedSpheres){
+				MSRigidBody.AddForce(-1f * distanceToMedSphere * speed * Time.fixedDeltaTime);
+			}
+		}
 
 		pursueTarget();
 		updateTargetVisibility ();
 		if (targetInRange()) {
 			foreach (GameObject target in visibleTargets){
-				target.GetComponent<TargetController>().takeDamage(10);
+				if (canAttack){
+					Debug.Log (lastAttack);
+					Debug.Log (Time.time);
+					lastAttack= Time.time;
+					target.GetComponent<TargetController>().takeDamage(10);
+					canAttack = false;
+					if(target.GetComponent<TargetController>().isDead ()){
+						visibleTargets.Remove(target);
+						targets.Remove (target);
+						player.GetComponent<BigSphereController>().targetStateChanged = true;
+						this.setIsEngaged(false);
+					}
+				}
 			}
 			//if (mySmallSpheres.Count != 0){
 			//	foreach (GameObject sphere in mySmallSpheres){
@@ -83,6 +101,9 @@ public class MediumSphereController : MonoBehaviour {
 		//		this.dispatchTargetLocation(sphere, this.transform.position);
 		//	}
 		//}
+		if ((lastAttack + 1f) < Time.time) {
+			canAttack = true;
+		}
 	}
 	public bool getIsEngaged(){
 		return this.isEngaged;
@@ -117,7 +138,7 @@ public class MediumSphereController : MonoBehaviour {
 	}
 	void updateTargetVisibility(){
 		foreach (GameObject uTarget in targets) {
-			if (Mathf.Abs((uTarget.transform.position - this.transform.position).magnitude) < visionRadius){
+			if (Mathf.Abs((uTarget.transform.position - this.transform.position).magnitude) < visionRadius && !uTarget.GetComponent<TargetController>().isDead()){
 				if (!this.visibleTargets.Contains(uTarget)){
 					visibleTargets.Add(uTarget);
 				}
@@ -125,6 +146,7 @@ public class MediumSphereController : MonoBehaviour {
 			else if (visibleTargets.Contains (uTarget)){
 				visibleTargets.Remove (uTarget);
 			}
+			if(uTarget.GetComponent<TargetController>().isDead()) visibleTargets.Remove (uTarget);
 		}
 	}
 }

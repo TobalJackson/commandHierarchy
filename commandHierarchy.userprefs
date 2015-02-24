@@ -1,10 +1,12 @@
 ﻿<Properties>
-  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" PreferredExecutionTarget="MonoDevelop.Default" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="Assets\Scripts\MediumSphereController.cs">
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets\Scripts\BigSphereController.cs">
     <Files>
-      <File FileName="Assets\Scripts\MediumSphereController.cs" Line="114" Column="17" />
-      <File FileName="Assets\Scripts\BigSphereController.cs" Line="11" Column="2" />
+      <File FileName="Assets\Scripts\MediumSphereController.cs" Line="141" Column="102" />
+      <File FileName="Assets\Scripts\BigSphereController.cs" Line="75" Column="1" />
       <File FileName="Assets\Scripts\smallSphereController.cs" Line="52" Column="31" />
+      <File FileName="Assets\Scripts\TargetController.cs" Line="26" Column="20" />
+      <File FileName="Assets\Scripts\GUIScript.cs" Line="18" Column="1" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
