@@ -55,7 +55,7 @@ public class BigSphereController : MonoBehaviour {
 		sphereForce.Set (h, 0f, v);
 		rigidSphere.AddForce (sphereForce * speed * Time.fixedDeltaTime);
 		if (targetInRange()) {
-			if (targetStateChanged){
+			//if (targetStateChanged){
 				foreach (GameObject target in visibleTargets){
 					if (coverage[target] == 0 && !target.GetComponent<TargetController>().isDead()){
 						GameObject medSphere = getAvailableMedSphere();
@@ -67,9 +67,10 @@ public class BigSphereController : MonoBehaviour {
 					}
 				}
 				targetStateChanged = false;
-			}
-			else foreach(GameObject medSphere in mediumSpheres) {
-				if(!medSphere.GetComponent<MediumSphereController>().getIsEngaged()){
+			//}
+			//else foreach(GameObject medSphere in mediumSpheres) {
+			foreach(GameObject medSphere in mediumSpheres) {
+				if(medSphere.GetComponent<MediumSphereController>().getIsEngaged() == false){
 					medSphere.GetComponent<MediumSphereController>().setDestination(this.transform.position);
 					//medSphere.GetComponent<MediumSphereController>().setIsEngaged (false);
 				}
@@ -84,10 +85,24 @@ public class BigSphereController : MonoBehaviour {
 		if (this.visibleTargets.Count == 0)	return false; 
 		else return true;
 	}
+	public void removeTarget(GameObject target){
+		if (myTargets.Contains(target)) myTargets.Remove (target);
+		if (visibleTargets.Contains(target)) visibleTargets.Remove (target);
+	}
 	GameObject getAvailableMedSphere(){
 		foreach(GameObject medSphere in mediumSpheres){
 			if (medSphere.GetComponent<MediumSphereController>().getIsEngaged() == false) return medSphere;
 		}
 		return null;
+	}
+	public string followerStateString(){
+		string status = "";
+		int count = 0;
+		foreach(GameObject medSphere in mediumSpheres){
+			status += "MediumSphere " + count + " engaged: " +medSphere.GetComponent<MediumSphereController>().getIsEngaged().ToString() + "\n" +
+				"\t" + "Targets In View: " + medSphere.GetComponent<MediumSphereController>().getTargetsInRange() + "\n";
+			count++;
+		}
+		return status;
 	}
 }

@@ -17,6 +17,8 @@ public class MediumSphereController : MonoBehaviour {
 	Vector3 targetLocation;
 	Vector3 distanceToTarget;
 
+	float timeSinceLastSeenEnemy;
+
 	List<GameObject> targets;
 	ArrayList visibleTargets;
 
@@ -30,6 +32,8 @@ public class MediumSphereController : MonoBehaviour {
 	bool isEngaged;
 
 	void Start () {
+		timeSinceLastSeenEnemy = 0;
+
 		canAttack = true;
 		targets = new List<GameObject> ();
 		//mySmallSpheres = new ArrayList ();
@@ -75,18 +79,19 @@ public class MediumSphereController : MonoBehaviour {
 		pursueTarget();
 		updateTargetVisibility ();
 		if (targetInRange()) {
+			timeSinceLastSeenEnemy = Time.time;
 			foreach (GameObject target in visibleTargets){
 				if (canAttack){
-					Debug.Log (lastAttack);
-					Debug.Log (Time.time);
 					lastAttack= Time.time;
 					target.GetComponent<TargetController>().takeDamage(10);
 					canAttack = false;
 					if(target.GetComponent<TargetController>().isDead ()){
 						visibleTargets.Remove(target);
 						targets.Remove (target);
+						player.GetComponent <BigSphereController>().removeTarget(target);
 						player.GetComponent<BigSphereController>().targetStateChanged = true;
 						this.setIsEngaged(false);
+						Debug.Log ("Set isengaged to False after killing enemy!");
 					}
 				}
 			}
@@ -95,6 +100,11 @@ public class MediumSphereController : MonoBehaviour {
 			//		this.dispatchTargetLocation(sphere, targetLocation);
 			//	}
 			//}
+		}
+		else {
+			if (timeSinceLastSeenEnemy + 1 < Time.time){
+				this.setIsEngaged(false);
+			}
 		}
 		//else if(mySmallSpheres.Count != 0){
 		//	foreach (GameObject sphere in mySmallSpheres){
@@ -109,6 +119,7 @@ public class MediumSphereController : MonoBehaviour {
 		return this.isEngaged;
 	}
 	public void setIsEngaged(bool state){
+		if (state == true) this.timeSinceLastSeenEnemy = Time.time;
 		this.isEngaged = state;
 	}
 
@@ -135,6 +146,9 @@ public class MediumSphereController : MonoBehaviour {
 	public bool targetInRange(){
 		if (this.visibleTargets.Count == 0)	return false; 
 		else return true;
+	}
+	public int getTargetsInRange(){
+		return this.visibleTargets.Count;
 	}
 	void updateTargetVisibility(){
 		foreach (GameObject uTarget in targets) {
