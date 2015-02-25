@@ -49,8 +49,10 @@ public class BigSphereController : MonoBehaviour {
 			if (Mathf.Abs((uTarget.transform.position - this.transform.position).magnitude) < visionRadius && !uTarget.GetComponent<TargetController>().isDead()){
 				if (!this.visibleTargets.Contains(uTarget)){
 					Debug.Log ("BigSphere can now see target " + uTarget.gameObject.GetInstanceID() + "!");
-					visibleTargets.Add(uTarget);				//scan all targets to check which ones are within "visionRadius", add them to "visibleTargets" list.
-					coverage.Add (uTarget, 0);					//make a new "coverage" dict entry for the target with value of 0, indicating nobody is covering it.
+					visibleTargets.Add(uTarget);				//scan all targets to check which ones are within "visionRadius", add 
+																	//them to "visibleTargets" list.
+					coverage.Add (uTarget, 0);					//make a new "coverage" dict entry for the target with value of 0, 
+																	//indicating nobody is covering it.
 				}
 			}
 			else if (visibleTargets.Contains (uTarget)){
@@ -66,7 +68,6 @@ public class BigSphereController : MonoBehaviour {
 		sphereForce.Set (h, 0f, v);											//get user input, set vector up
 		rigidSphere.AddForce (sphereForce * speed * Time.fixedDeltaTime);	//move BigSphere
 		if (targetInRange()) {												//if visibleTargets.Count != 0
-			//if (targetStateChanged){
 				foreach (GameObject target in visibleTargets){															//for every visible target
 					if (coverage[target] == 0 && !target.GetComponent<TargetController>().isDead()){					//if it doesn't have coverage, and isn't dead
 						GameObject medSphere = getAvailableMedSphere();													//get a mediumSphere that isn't engaged
@@ -78,8 +79,7 @@ public class BigSphereController : MonoBehaviour {
 						}
 					}
 				}
-			//}
-			//else foreach(GameObject medSphere in mediumSpheres) {
+
 			foreach(GameObject medSphere in mediumSpheres) {															//for every medium sphere
 				if(medSphere.GetComponent<MediumSphereController>().getIsEngaged() == false){							//if it's not engaged
 					medSphere.GetComponent<MediumSphereController>().setDestination(this.transform.position);			//follow the big sphere.
