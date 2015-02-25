@@ -12,8 +12,7 @@ public class GUIScript : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-		text.text = bigSphere.GetComponent<BigSphereController> ().targetInRange ().ToString () + 
-			"\n" + bigSphere.GetComponent<BigSphereController>().targetStateChanged.ToString () +
-				"\n" + bigSphere.GetComponent<BigSphereController>().followerStateString();
+		text.text = "Commander can See Targets?: " + bigSphere.GetComponent<BigSphereController> ().targetInRange ().ToString () + 
+				"\n\n" + bigSphere.GetComponent<BigSphereController>().followerStateString();
 	}
 }

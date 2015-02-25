@@ -7,7 +7,7 @@ public class CameraController : MonoBehaviour{
 
 	Vector3 offset;
 	void Start(){
-		smoothing = 10f;
+		smoothing = 10000f;
 		offset = transform.position - target.position;
 	}
 

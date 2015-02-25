@@ -8,94 +8,109 @@ public class BigSphereController : MonoBehaviour {
 	public int followerMaxDistance;
 	public int visionRadius;
 
-	GameObject[] mediumSpheres;
-	GameObject[] targets;
-	ArrayList myTargets;
-	Dictionary<GameObject, int> coverage;
-	ArrayList visibleTargets;
-	Vector3 sphereForce;
-	Rigidbody rigidSphere;
-	public bool targetStateChanged;
+	GameObject[] mediumSpheres; 			//list of all medium spheres
+	GameObject[] targets;					//list of all target objects
+	ArrayList myTargets;					//mutable list of targets
+	Dictionary<GameObject, int> coverage;	//coverage of each target
+	ArrayList visibleTargets;				//list of targets BigSphere can see
+	Vector3 sphereForce;					//input-controlled vector 
+	Rigidbody rigidSphere;					//Bigspheres rigidsphere
+
 
 	// Use this for initialization
 	void Start () {
-		myTargets = new ArrayList ();
-		coverage = new Dictionary<GameObject, int> ();
-		mediumSpheres = GameObject.FindGameObjectsWithTag ("MediumSphere");
-		rigidSphere = GetComponent<Rigidbody> ();
-		sphereForce = new Vector3 ();
-		targets = GameObject.FindGameObjectsWithTag ("Target");
+		myTargets = new ArrayList ();											//initialize
+		coverage = new Dictionary<GameObject, int> ();							//initialize
+		mediumSpheres = GameObject.FindGameObjectsWithTag ("MediumSphere");		//initialize/populate
+		rigidSphere = GetComponent<Rigidbody> ();								//initialize
+		sphereForce = new Vector3 ();											//initialize
+		targets = GameObject.FindGameObjectsWithTag ("Target");					//initialize/populate
 		foreach (GameObject target in targets) {
-			myTargets.Add(target);
+			myTargets.Add(target);		//initialize
 		}
 		visibleTargets = new ArrayList ();
-		targetStateChanged = false;
 	}
 	
 	// Update is called once per frame
 	void Update () {
+		if (Input.GetButtonDown ("Jump")) {
+			if (Time.timeScale == 1.0f){
+				Time.timeScale = 0f;
+			}
+			else Time.timeScale = 1.0f;
+		}
+		if (Input.GetKeyDown(KeyCode.Q)){
+			Time.timeScale *= 0.5f;
+		}
+		if (Input.GetKeyDown (KeyCode.E)) {
+			Time.timeScale /= 0.5f;
+		}
 		foreach (GameObject uTarget in myTargets) {
 			if (Mathf.Abs((uTarget.transform.position - this.transform.position).magnitude) < visionRadius && !uTarget.GetComponent<TargetController>().isDead()){
 				if (!this.visibleTargets.Contains(uTarget)){
-					visibleTargets.Add(uTarget);
-					coverage.Add (uTarget, 0);
-					targetStateChanged = true;
+					Debug.Log ("BigSphere can now see target " + uTarget.gameObject.GetInstanceID() + "!");
+					visibleTargets.Add(uTarget);				//scan all targets to check which ones are within "visionRadius", add them to "visibleTargets" list.
+					coverage.Add (uTarget, 0);					//make a new "coverage" dict entry for the target with value of 0, indicating nobody is covering it.
 				}
 			}
 			else if (visibleTargets.Contains (uTarget)){
-				visibleTargets.Remove (uTarget);
-				coverage.Remove (uTarget);
-				targetStateChanged = true;
+				visibleTargets.Remove (uTarget);				//if targets outside visionRadius, remove them from "visibleTargets".
+				coverage.Remove (uTarget);						//and remove from "coverage"
 			}
 		}
 	}
 	void FixedUpdate(){
 		float h = Input.GetAxis ("Horizontal");
 		float v = Input.GetAxis ("Vertical");
-		sphereForce.Set (h, 0f, v);
-		rigidSphere.AddForce (sphereForce * speed * Time.fixedDeltaTime);
-		if (targetInRange()) {
+
+		sphereForce.Set (h, 0f, v);											//get user input, set vector up
+		rigidSphere.AddForce (sphereForce * speed * Time.fixedDeltaTime);	//move BigSphere
+		if (targetInRange()) {												//if visibleTargets.Count != 0
 			//if (targetStateChanged){
-				foreach (GameObject target in visibleTargets){
-					if (coverage[target] == 0 && !target.GetComponent<TargetController>().isDead()){
-						GameObject medSphere = getAvailableMedSphere();
+				foreach (GameObject target in visibleTargets){															//for every visible target
+					if (coverage[target] == 0 && !target.GetComponent<TargetController>().isDead()){					//if it doesn't have coverage, and isn't dead
+						GameObject medSphere = getAvailableMedSphere();													//get a mediumSphere that isn't engaged
 						if (medSphere != null){
-							medSphere.GetComponent<MediumSphereController>().setDestination(target.transform.position);
-							medSphere.GetComponent<MediumSphereController>().setIsEngaged (true);
-							coverage[target] += 1;
+							Debug.Log("BigSphere orders mediumSphere " + medSphere.gameObject.GetInstanceID() + " to attack " + target.gameObject.GetInstanceID() + "!");
+							medSphere.GetComponent<MediumSphereController>().setDestination(target.transform.position);	//set that mediumSphere's destination to the target location
+							medSphere.GetComponent<MediumSphereController>().setIsEngaged (true);						//and consider it engaged.
+							coverage[target] += 1;																		//and set that target's coverage = 1
 						}
 					}
 				}
-				targetStateChanged = false;
 			//}
 			//else foreach(GameObject medSphere in mediumSpheres) {
-			foreach(GameObject medSphere in mediumSpheres) {
-				if(medSphere.GetComponent<MediumSphereController>().getIsEngaged() == false){
-					medSphere.GetComponent<MediumSphereController>().setDestination(this.transform.position);
+			foreach(GameObject medSphere in mediumSpheres) {															//for every medium sphere
+				if(medSphere.GetComponent<MediumSphereController>().getIsEngaged() == false){							//if it's not engaged
+					medSphere.GetComponent<MediumSphereController>().setDestination(this.transform.position);			//follow the big sphere.
+
 					//medSphere.GetComponent<MediumSphereController>().setIsEngaged (false);
 				}
 			}
 		}
-		else foreach(GameObject medSphere in mediumSpheres) {
-			medSphere.GetComponent<MediumSphereController>().setDestination(this.transform.position);
-			medSphere.GetComponent<MediumSphereController>().setIsEngaged (false);
+		else {
+			foreach(GameObject medSphere in mediumSpheres) {												//If there are no targets in range
+			medSphere.GetComponent<MediumSphereController>().setDestination(this.transform.position);		//Have every medium sphere follow BigSphere
+			medSphere.GetComponent<MediumSphereController>().setIsEngaged (false);							//Set them to disengaged.
+			}
+			Debug.Log("BigSphere orders mediumSpheres to Follow!");
 		}
 	}
-	public bool targetInRange(){
+	public bool targetInRange(){							//are there any visible targets?
 		if (this.visibleTargets.Count == 0)	return false; 
 		else return true;
 	}
-	public void removeTarget(GameObject target){
+	public void removeTarget(GameObject target){			//get rid of targets that BigSphere cares about
 		if (myTargets.Contains(target)) myTargets.Remove (target);
 		if (visibleTargets.Contains(target)) visibleTargets.Remove (target);
 	}
-	GameObject getAvailableMedSphere(){
+	GameObject getAvailableMedSphere(){						//find the first available mediumSphere that isn't engaged
 		foreach(GameObject medSphere in mediumSpheres){
 			if (medSphere.GetComponent<MediumSphereController>().getIsEngaged() == false) return medSphere;
 		}
 		return null;
 	}
-	public string followerStateString(){
+	public string followerStateString(){					//print mediumSphere's status
 		string status = "";
 		int count = 0;
 		foreach(GameObject medSphere in mediumSpheres){
